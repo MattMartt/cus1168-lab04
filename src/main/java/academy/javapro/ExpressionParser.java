@@ -11,45 +11,70 @@ class ExpressionParser {
 
     // expr → expr + term
     public double parseExpression() {
-        // TODO: Get the leftmost term value by calling parseTerm()
-        // TODO: While we haven't reached the end of input and current char is '+'
-        // TODO: Increment position to skip the '+' operator
-        // TODO: Get the next term on the right
-        // TODO: Add the right term to our running total
-        // TODO: Return the final value
-        throw new UnsupportedOperationException("Implement parseExpression");
+        double result = parseTerm();
+        while (position < input.length()) {
+            char operator = input.charAt(position);
+            if (operator == '+') {
+                position++;
+                result += parseTerm();
+            } else if (operator == '*' || operator == ')') {
+                break;
+            } else if (!Character.isWhitespace(operator)) {
+                throw new IllegalArgumentException("Unexpected character: " + operator + " at position " + position);
+            } else {
+                position++;
+            }
+        }
+        return result;
     }
 
     // term → term * factor
     private double parseTerm() {
-        // TODO: Get the leftmost factor value by calling parseFactor()
-        // TODO: While we haven't reached the end of input and current char is '*'
-        // TODO: Increment position to skip the '*' operator
-        // TODO: Get the next factor on the right
-        // TODO: Multiply the right factor with our running total
-        // TODO: Return the final value
-        throw new UnsupportedOperationException("Implement parseTerm");
+        double result = parseFactor();
+        while (position < input.length()) {
+            char operator = input.charAt(position);
+            if (operator == '*') {
+                position++;
+                result *= parseFactor();
+            } else if (operator == '+' || operator == ')') {
+                break;
+            } else if (!Character.isWhitespace(operator)) {
+                throw new IllegalArgumentException("Unexpected character: " + operator + " at position " + position);
+            } else {
+                position++;
+            }
+        }
+        return result;
     }
 
     // factor → ( expr )
     private double parseFactor() {
-        // TODO: Check if we have an opening parenthesis and haven't reached end of input
-        // TODO: Increment position to skip the opening parenthesis
-        // TODO: Parse the expression inside the parentheses
-        // TODO: Increment position to skip the closing parenthesis
-        // TODO: Return the result of the parenthesized expression
-        // TODO: If no parentheses, parse and return a number
-        throw new UnsupportedOperationException("Implement parseFactor");
+        if (position < input.length() && input.charAt(position) == '(') {
+            position++;
+            double result = parseExpression();
+            if (position >= input.length() || input.charAt(position) != ')') {
+                throw new IllegalArgumentException("Expected closing parenthesis at position " + position);
+            }
+            position++;
+            return result;
+        } else if (position < input.length()) {
+            return parseNumber();
+        } else {
+            throw new IllegalArgumentException("Unexpected end of input at position " + position);
+        }
     }
 
     // Parse a numeric value
     private double parseNumber() {
-        // TODO: Create a StringBuilder to collect digits
-        // TODO: While we haven't reached the end and current char is digit or decimal point
-        // TODO: Append the current digit to our number string
-        // TODO: Move to next character
-        // TODO: Convert the string of digits to a double and return it
-        throw new UnsupportedOperationException("Implement parseNumber");
+        StringBuilder digits = new StringBuilder();
+        while (position < input.length() && (Character.isDigit(input.charAt(position)) || input.charAt(position) == '.')) {
+            digits.append(input.charAt(position));
+            position++;
+        }
+        if (digits.length() == 0) {
+            throw new IllegalArgumentException("Expected number at position " + position);
+        }
+        return Double.parseDouble(digits.toString());
     }
 
     public static void main(String[] args) {
